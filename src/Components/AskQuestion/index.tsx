@@ -1,12 +1,18 @@
-import { TextField } from "@mui/material";
+import { Divider, TextField } from "@mui/material";
 import LoadingButton from "@mui/lab/LoadingButton";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Box, margin, width } from "@mui/system";
+
+interface Answer {
+  confidence: number;
+  html: string;
+}
 
 const AskQuestion = () => {
   const [questionValue, setQuestionValue] = useState("");
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [answers, setAnswers] = useState([]);
+  const [answers, setAnswers] = useState<Answer[]>([]);
 
   function handleSearchClick(e: any) {
     setIsButtonLoading(true);
@@ -23,8 +29,10 @@ const AskQuestion = () => {
   console.log(answers);
 
   return (
-    <div>
-      <div>
+    <Box>
+      <Box
+        sx={{ marginBottom: 1, display: "flex", alignItems: "center", gap: 2 }}
+      >
         <TextField
           placeholder="Ask some question"
           value={questionValue}
@@ -39,12 +47,25 @@ const AskQuestion = () => {
         >
           Search
         </LoadingButton>
-      </div>
-
-      {answers.map((answer) => {
-        return <div>sss</div>;
-      })}
-    </div>
+      </Box>
+      <>
+        {answers.map((answer, index) => {
+          console.log(answer);
+          return (
+            <Box
+              key={index}
+              sx={{ padding: 4, marginBottom: 4, background: "gray" }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: answer.html }} />
+              <Divider />
+              <div>
+                Confidence:{parseFloat(`${answer?.confidence}`).toFixed(2)} %
+              </div>
+            </Box>
+          );
+        })}
+      </>
+    </Box>
   );
 };
 

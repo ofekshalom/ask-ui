@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AskQuestion from "./Components/AskQuestion";
+import { Box } from "@mui/material";
 
 function App() {
   const [exampleResponse, setExampleResponse] = useState("");
@@ -16,9 +17,9 @@ function App() {
       });
   }, []);
   return (
-    <div>
+    <Box sx={{ width: "80%", margin: "auto" }}>
       <AskQuestion />
-    </div>
+    </Box>
   );
 }
 
