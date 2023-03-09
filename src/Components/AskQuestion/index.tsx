@@ -1,18 +1,22 @@
-import { Divider, TextField } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
+import { IconButton, styled, TextField, Tooltip } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Box, margin, width } from "@mui/system";
+import SearchIcon from "@mui/icons-material/Search";
+import CircularProgress from "@mui/material/CircularProgress";
+import Answer from "./Answer";
+import { AnswerType } from "../../types/types";
 
-interface Answer {
-  confidence: number;
-  html: string;
-}
+export const TextFieldWrapper = styled(TextField)`
+  fieldset {
+    border-radius: 24px;
+  }
+`;
 
 const AskQuestion = () => {
   const [questionValue, setQuestionValue] = useState("");
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [answers, setAnswers] = useState<AnswerType[]>([]);
 
   function handleSearchClick(e: any) {
     setIsButtonLoading(true);
@@ -26,44 +30,46 @@ const AskQuestion = () => {
   useEffect(() => {
     setIsButtonLoading(false);
   }, [answers]);
-  console.log(answers);
+ 
 
   return (
-    <Box>
-      <Box
-        sx={{ marginBottom: 1, display: "flex", alignItems: "center", gap: 2 }}
-      >
-        <TextField
-          placeholder="Ask some question"
-          value={questionValue}
-          onChange={(e) => {
-            setQuestionValue(e.target.value);
-          }}
-        />
-        <LoadingButton
-          loading={isButtonLoading}
-          variant="contained"
-          onClick={handleSearchClick}
-        >
-          Search
-        </LoadingButton>
-      </Box>
+    <Box
+      sx={{
+        marginTop: 2,
+        width: 582,
+        margin: "auto",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <TextFieldWrapper
+        sx={{ marginBottom: 2, width: "100%" }}
+        placeholder="Ask some question"
+        value={questionValue}
+        size="small"
+        onChange={(e) => {
+          setQuestionValue(e.target.value);
+        }}
+        InputProps={{
+          endAdornment: isButtonLoading ? (
+            <CircularProgress
+              size={24}
+              sx={{ padding: "8px", display: "flex" }}
+            />
+          ) : (
+            <Tooltip title="Search">
+              <IconButton onClick={handleSearchClick}>
+                <SearchIcon />
+              </IconButton>
+            </Tooltip>
+          ),
+        }}
+      />
+
       <>
-        {answers.map((answer, index) => {
-          console.log(answer);
-          return (
-            <Box
-              key={index}
-              sx={{ padding: 4, marginBottom: 4, background: "gray" }}
-            >
-              <div dangerouslySetInnerHTML={{ __html: answer.html }} />
-              <Divider />
-              <div>
-                Confidence:{parseFloat(`${answer?.confidence}`).toFixed(2)} %
-              </div>
-            </Box>
-          );
-        })}
+        {answers.map((answer) => (
+          <Answer answer={answer} />
+        ))}
       </>
     </Box>
   );

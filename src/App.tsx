@@ -1,25 +1,32 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AskQuestion from "./Components/AskQuestion";
-import { Box } from "@mui/material";
+import { Box, ThemeProvider } from "@mui/material";
+import Image from "./imgs/logo.svg";
+import { styled } from "@mui/system";
+import { theme } from "./style/theme";
+
+const StyledLogo = styled("img")({
+  width: 150,
+  height: 150,
+});
 
 function App() {
-  const [exampleResponse, setExampleResponse] = useState("");
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:3031/example")
-      .then((response) => {
-        setExampleResponse(response?.data?.response);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
   return (
-    <Box sx={{ width: "80%", margin: "auto" }}>
-      <AskQuestion />
-    </Box>
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          width: "80%",
+          margin: "auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <StyledLogo src={Image} />
+        <AskQuestion />
+      </Box>
+    </ThemeProvider>
   );
 }
 
