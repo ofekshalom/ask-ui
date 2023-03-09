@@ -1,6 +1,6 @@
 import { IconButton, styled, TextField, Tooltip } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { KeyboardEvent, useEffect, useState } from "react";
 import { Box, margin, width } from "@mui/system";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -18,7 +18,13 @@ const AskQuestion = () => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [answers, setAnswers] = useState<AnswerType[]>([]);
 
-  function handleSearchClick(e: any) {
+  function handleKeyPress(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Enter" && questionValue) {
+      handleSearchClick();
+    }
+  }
+
+  function handleSearchClick() {
     setIsButtonLoading(true);
     axios
       .post("http://localhost:3031/ask", { question: questionValue })
@@ -30,7 +36,6 @@ const AskQuestion = () => {
   useEffect(() => {
     setIsButtonLoading(false);
   }, [answers]);
- 
 
   return (
     <Box
@@ -43,6 +48,7 @@ const AskQuestion = () => {
       }}
     >
       <TextFieldWrapper
+        autoFocus
         sx={{ marginBottom: 2, width: "100%" }}
         placeholder="Ask some question"
         value={questionValue}
@@ -50,6 +56,7 @@ const AskQuestion = () => {
         onChange={(e) => {
           setQuestionValue(e.target.value);
         }}
+        onKeyDown={handleKeyPress}
         InputProps={{
           endAdornment: isButtonLoading ? (
             <CircularProgress
@@ -68,7 +75,7 @@ const AskQuestion = () => {
 
       <>
         {answers.map((answer) => (
-          <Answer answer={answer} />
+          <Answer key={answer.id} answer={answer} />
         ))}
       </>
     </Box>

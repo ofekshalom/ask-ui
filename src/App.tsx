@@ -6,10 +6,10 @@ import Image from "./imgs/logo.svg";
 import { styled } from "@mui/system";
 import { theme } from "./style/theme";
 
-const StyledLogo = styled("img")({
-  width: 150,
-  height: 150,
-});
+const StyledLogo = styled("img")`
+  width: 150px;
+  height: 150px;
+`;
 
 function App() {
   return (
