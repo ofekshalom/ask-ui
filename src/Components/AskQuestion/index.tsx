@@ -1,41 +1,65 @@
 import { IconButton, styled, TextField, Tooltip } from "@mui/material";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { KeyboardEvent, useEffect, useState } from "react";
-import { Box, margin, width } from "@mui/system";
+import { Box } from "@mui/system";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 import Answer from "./Answer";
 import { AnswerType } from "../../types/types";
+import AnswerSkeleton from "./Answer/AnswersSkeleton";
+import ServerError from "../Common/ServerError";
 
 export const TextFieldWrapper = styled(TextField)`
   fieldset {
     border-radius: 24px;
   }
 `;
+const httpErrorToErrorMessage: Record<number | string, string> = {
+  403: "Please enter a question",
+  404: "Sorry we could'nt handle your question.",
+  ECONNABORTED: "Sorry we couldn't send your answer",
+};
 
 const AskQuestion = () => {
   const [questionValue, setQuestionValue] = useState("");
   const [isButtonLoading, setIsButtonLoading] = useState(false);
-  const [answers, setAnswers] = useState<AnswerType[]>([]);
+  const [answers, setAnswers] = useState<AnswerType[]>();
+  const [errorMessage, setErrorMessage] = useState("");
 
   function handleKeyPress(event: KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Enter" && questionValue) {
-      handleSearchClick();
+    if (event.key === "Enter") {
+      handleSearch();
     }
   }
 
-  function handleSearchClick() {
+  function handleSearch() {
+    if (!questionValue) {
+      return;
+    }
+
     setIsButtonLoading(true);
+    setErrorMessage("");
+
     axios
-      .post("http://localhost:3031/ask", { question: questionValue })
+      .post(
+        "http://localhost:3031/ask",
+        { question: questionValue },
+        { timeout: 10_000 }
+      )
       .then((response) => {
         setAnswers(response.data);
+      })
+      .catch((err) => {
+        console.log(err);
+
+        const errorCode = (err?.response?.status || err?.code) as number;
+
+        setErrorMessage(httpErrorToErrorMessage[errorCode] ?? err?.message);
+      })
+      .finally(() => {
+        setIsButtonLoading(false);
       });
   }
-
-  useEffect(() => {
-    setIsButtonLoading(false);
-  }, [answers]);
 
   return (
     <Box
@@ -49,8 +73,8 @@ const AskQuestion = () => {
     >
       <TextFieldWrapper
         autoFocus
-        sx={{ marginBottom: 2, width: "100%" }}
-        placeholder="Ask some question"
+        sx={{ marginBottom: 3, width: "100%" }}
+        placeholder="Ask me some question"
         value={questionValue}
         size="small"
         onChange={(e) => {
@@ -65,7 +89,7 @@ const AskQuestion = () => {
             />
           ) : (
             <Tooltip title="Search">
-              <IconButton onClick={handleSearchClick}>
+              <IconButton onClick={handleSearch}>
                 <SearchIcon />
               </IconButton>
             </Tooltip>
@@ -73,10 +97,12 @@ const AskQuestion = () => {
         }}
       />
 
+      {isButtonLoading && <AnswerSkeleton />}
+
       <>
-        {answers.map((answer) => (
-          <Answer key={answer.id} answer={answer} />
-        ))}
+        {!isButtonLoading &&
+          answers?.map((answer) => <Answer key={answer.id} answer={answer} />)}
+        {errorMessage && <ServerError errorMessage={errorMessage} />}
       </>
     </Box>
   );

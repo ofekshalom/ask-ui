@@ -1,52 +1,36 @@
-import { Box, Divider } from "@mui/material";
-import { styled } from "@mui/system";
+import { Divider } from "@mui/material";
 import { AnswerType } from "../../../types/types";
+import {
+  StyledAnswerWrapper,
+  StyledChip,
+  StyledChipWrapper,
+  StyledConfidence,
+  StyledHtmlSection,
+  StyledTaskAltIcon,
+} from "./Answer.styles";
 
 interface AnswerProps {
   answer: AnswerType;
 }
 
-const StyledAnswerWrapper = styled("div")`
-  border-radius: ${(props) => props.theme.spacing(2)};
-  margin-bottom: ${(props) => props.theme.spacing(2)};
-  /* padding: ${(props) => props.theme.spacing(2)}; */
-  background: white;
-  box-shadow: rgb(145 158 171 / 20%) 0px 0px 2px 0px,
-    rgb(145 158 171 / 12%) 0px 12px 24px -4px;
-`;
-const StyledHtmlSection = styled("div")`
-  min-height: calc(72px - ${(props) => props.theme.spacing(3)});
-  margin-top: ${(props) => props.theme.spacing(3)};
-  margin-inline-start: ${(props) => props.theme.spacing(3)};
-  margin-bottom: ${(props) => props.theme.spacing(3)};
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  ul:last-child {
-    margin-bottom: 0;
-  }
-`;
-const StyledConfidence = styled("div")`
-  height: 72px;
-  display: flex;
-  justify-items: center;
-  align-items: center;
-  margin-inline-start: ${(props) => props.theme.spacing(3)};
-`;
-
 const Answer = ({ answer }: AnswerProps) => {
-  const { id, confidence, html } = answer;
+  const { id, confidence, html, isBestAnswer } = answer;
+  console.log(isBestAnswer);
 
   return (
     <StyledAnswerWrapper key={id}>
-      <StyledHtmlSection>
+      {isBestAnswer && (
+        <StyledChipWrapper
+          style={{ display: "flex", justifyContent: "flex-end" }}
+        >
+          <StyledChip icon={<StyledTaskAltIcon />} label="Best" />
+        </StyledChipWrapper>
+      )}
+      <StyledHtmlSection isBestAnswer={isBestAnswer}>
         <div dangerouslySetInnerHTML={{ __html: html }} />
       </StyledHtmlSection>
       <Divider />
-      <StyledConfidence>
-        Confidence: {parseFloat(`${confidence}`).toFixed(2)} %
-      </StyledConfidence>
+      <StyledConfidence>Confidence: {confidence.toFixed(2)} %</StyledConfidence>
     </StyledAnswerWrapper>
   );
 };
