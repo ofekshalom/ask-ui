@@ -18,12 +18,12 @@ export const TextFieldWrapper = styled(TextField)`
 const httpErrorToErrorMessage: Record<number | string, string> = {
   403: "Please enter a question",
   404: "Sorry we could'nt handle your question.",
-  ECONNABORTED: "Sorry we couldn't send your answer",
+  ECONNABORTED: "Sorry we couldn't send your question",
 };
 
 const AskQuestion = () => {
   const [questionValue, setQuestionValue] = useState("");
-  const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [answers, setAnswers] = useState<AnswerType[]>();
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -34,11 +34,11 @@ const AskQuestion = () => {
   }
 
   function handleSearch() {
-    if (!questionValue) {
+    if (!questionValue || isFetching) {
       return;
     }
 
-    setIsButtonLoading(true);
+    setIsFetching(true);
     setErrorMessage("");
 
     axios
@@ -51,14 +51,13 @@ const AskQuestion = () => {
         setAnswers(response.data);
       })
       .catch((err) => {
-        console.log(err);
-
         const errorCode = (err?.response?.status || err?.code) as number;
 
         setErrorMessage(httpErrorToErrorMessage[errorCode] ?? err?.message);
+        setAnswers(undefined);
       })
       .finally(() => {
-        setIsButtonLoading(false);
+        setIsFetching(false);
       });
   }
 
@@ -83,7 +82,7 @@ const AskQuestion = () => {
         }}
         onKeyDown={handleKeyPress}
         InputProps={{
-          endAdornment: isButtonLoading ? (
+          endAdornment: isFetching ? (
             <CircularProgress
               size={24}
               sx={{ padding: "8px", display: "flex" }}
@@ -98,15 +97,15 @@ const AskQuestion = () => {
         }}
       />
 
-      {isButtonLoading && <AnswerSkeleton />}
+      {isFetching && <AnswerSkeleton />}
 
       <>
-        {!isButtonLoading &&
+        {!isFetching &&
           answers?.map((answer) => <Answer key={answer.id} answer={answer} />)}
 
         {errorMessage && <ServerError errorMessage={errorMessage} />}
 
-        {!isButtonLoading && answers?.length === 0 && <NoResult />}
+        {!isFetching && answers?.length === 0 && <NoResult />}
       </>
     </Box>
   );
