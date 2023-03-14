@@ -8,6 +8,7 @@ import Answer from "./Answer";
 import { AnswerType } from "../../types/types";
 import AnswerSkeleton from "./Answer/AnswersSkeleton";
 import ServerError from "../Common/ServerError";
+import NoResult from "../Common/NoResult";
 
 export const TextFieldWrapper = styled(TextField)`
   fieldset {
@@ -102,7 +103,10 @@ const AskQuestion = () => {
       <>
         {!isButtonLoading &&
           answers?.map((answer) => <Answer key={answer.id} answer={answer} />)}
+
         {errorMessage && <ServerError errorMessage={errorMessage} />}
+
+        {!isButtonLoading && answers?.length === 0 && <NoResult />}
       </>
     </Box>
   );
